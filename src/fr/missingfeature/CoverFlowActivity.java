@@ -3,6 +3,7 @@ package fr.missingfeature;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -16,6 +17,18 @@ public class CoverFlowActivity extends Activity implements
 	private CoverFlowView mCoverflow;
 	int mIndex = 0;
 
+	public static final int NUMBER_OF_IMAGES = 30;
+
+	public static Bitmap[] getBitmaps(Context c) throws IOException {
+		Bitmap[] result = new Bitmap[NUMBER_OF_IMAGES];
+		for (int i = 0; i < NUMBER_OF_IMAGES; i++) {
+			Bitmap b = BitmapFactory.decodeStream(c.getAssets().open(
+					String.format("images/%d.jpg", i)));
+			result[i] = b;
+		}
+		return result;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -23,7 +36,7 @@ public class CoverFlowActivity extends Activity implements
 
 		mCoverflow = (CoverFlowView) findViewById(R.id.coverflow);
 		try {
-			mBitmaps = ImageTestActivity.getBitmaps(this);
+			mBitmaps = getBitmaps(this);
 		} catch (IOException e) {
 			Log.e(TAG, "Could not load bitmaps", e);
 		}
