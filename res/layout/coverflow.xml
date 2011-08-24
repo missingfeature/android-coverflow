@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="#ff0000ff"
+	android:padding="10sp">
+
+	<Button android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="PREVIOUS"
+		android:onClick="onClickPrevious" />
+	<Button android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="NEXT"
+		android:onClick="onClickNext" />
+	<fr.missingfeature.CoverFlowView
+		android:layout_width="fill_parent" android:layout_height="400sp"
+		android:id="@+id/coverflow" android:background="#FF000000" />
+
+</LinearLayout>
