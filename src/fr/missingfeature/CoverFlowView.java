@@ -49,7 +49,6 @@ public class CoverFlowView extends LinearLayout {
 	int mHalfScreenWidth;
 
 	boolean mIsSingleTap;
-	boolean mIsDoubleTap;
 	boolean mIsDraggingCover;
 	float mStartPosition;
 
@@ -296,7 +295,37 @@ public class CoverFlowView extends LinearLayout {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		return super.onTouchEvent(event);
+//		return super.onTouchEvent(event);
+		
+		switch(event.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			mIsSingleTap = event.getPointerCount() == 1;
+			mBeginningCover = mSelectedCoverView.getNumber();
+			mStartPosition = event.getX(0) + mScrollView.getScrollX();
+			break;
+		case MotionEvent.ACTION_MOVE:
+			mIsSingleTap = false;
+			int offset = (int)(mStartPosition - event.getX(0));
+			mScrollView.scrollTo(offset, mScrollView.getScrollY());
+			int newCover = offset / CoverFlowConstants.COVER_SPACING;
+			if (newCover != mSelectedCoverView.getNumber()) {
+				if (newCover < 0)
+					setSelectedCover(0);
+				else if (newCover >= mNumberOfImages)
+					setSelectedCover(mNumberOfImages - 1);
+				else
+					setSelectedCover(newCover);
+			}
+			break;
+		case MotionEvent.ACTION_UP:
+			if (mBeginningCover != mSelectedCoverView.getNumber()) {
+				if (null != mListener && null != mListener.get())
+					mListener.get().onSelectionChanged(this, mSelectedCoverView.getNumber());
+			}
+			break;
+		}
+		
+		return true;
 	}
 
 	public void setNumberOfImages(int numberOfImages) {
