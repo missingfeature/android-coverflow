@@ -39,12 +39,13 @@ public class CoverFlowActivity extends Activity implements
 		} catch (IOException e) {
 			Log.e(TAG, "Could not load bitmaps", e);
 		}
-		for (int i = 0; mBitmaps != null && i < 10/* mBitmaps.length */; i++) {
+		
+		for (int i = 0; mBitmaps != null && i < mBitmaps.length ; i++) {
 			mCoverflow.setBitmapForIndex(mBitmaps[i], i);
 		}
 		mCoverflow.setDataSource(this);
 		mCoverflow.setListener(this);
-		mCoverflow.setNumberOfImages(10/* mBitmaps.length */);
+		mCoverflow.setNumberOfImages(mBitmaps.length);
 //		mCoverflow.setSelectedCover(8);
 //		mCoverflow.centerOnSelectedCover(false);
 	}

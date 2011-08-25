@@ -74,9 +74,16 @@ public class CoverFlowView extends LinearLayout {
 	}
 
 	void setUpInitialState() {
-
+		
 		// Create the scrollView
-		mScrollView = new ScrollView(getContext());
+		mScrollView = new ScrollView(getContext()){
+			// Catch trackball events
+			@Override
+			public boolean onTrackballEvent(MotionEvent event) {
+				return CoverFlowView.this.onTrackballEvent(event);
+			}
+			
+		};
 		mScrollView.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
 				return CoverFlowView.this.onTouchEvent(event);
@@ -317,8 +324,6 @@ public class CoverFlowView extends LinearLayout {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		// return super.onTouchEvent(event);
-
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			mIsSingleTap = event.getPointerCount() == 1;
@@ -382,6 +387,35 @@ public class CoverFlowView extends LinearLayout {
 			break;
 		}
 
+		return true;
+	}
+	
+	
+
+	@Override
+	public boolean onTrackballEvent(MotionEvent event) {
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_MOVE:
+			int newCover = -1;
+			if (event.getX(0) > 0)
+				newCover = mSelectedCoverView.getNumber() + 1;
+			else if (event.getX(0) < 0)
+				newCover = mSelectedCoverView.getNumber() - 1;
+			
+			
+			if (0 <= newCover 
+					&& mNumberOfImages > newCover
+					&& mSelectedCoverView.getNumber() != newCover) {
+				setSelectedCover(newCover);
+				mScrollView.smoothScrollTo(newCover * CoverFlowConstants.COVER_SPACING, mScrollView.getScrollY());
+				// Notify listener
+				if (null != mListener && null != mListener.get())
+					mListener.get().onSelectionChanged(this,
+							mSelectedCoverView.getNumber());
+
+			}
+			break;
+		}
 		return true;
 	}
 
