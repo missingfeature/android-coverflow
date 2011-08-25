@@ -85,6 +85,8 @@ public class CoverFlowView extends LinearLayout {
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
 				LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		mScrollView.setLayoutParams(params);
+		mScrollView.setHorizontalScrollBarEnabled(CoverFlowConstants.HORIZONTAL_SCROLLBAR_ENABLED);
+		mScrollView.setHorizontalFadingEdgeEnabled(CoverFlowConstants.FADING_EDGES_ENABLED);
 		addView(mScrollView);
 
 		// Create an intermediate LinearLayout

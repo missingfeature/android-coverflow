@@ -10,4 +10,6 @@ public class CoverFlowConstants {
 	public static final int COVER_BUFFER = 6;
 	public static final long BLUR_ANIMATION_DURATION = 120;
 	public static final int DROP_SHADOW_RADIUS = 15;
+	public static final boolean HORIZONTAL_SCROLLBAR_ENABLED = false;
+	public static final boolean FADING_EDGES_ENABLED = true;
 }

@@ -133,6 +133,9 @@ public class CoverFlowItem extends ImageView {
 	}
 
 	static Bitmap createReflectedBitmap(Bitmap b, float reflectionFraction) {
+		if (0 == reflectionFraction && 0 == CoverFlowConstants.DROP_SHADOW_RADIUS)
+			return b;
+		
 		Bitmap reflection;
 		Bitmap result;
 		Matrix matrix = new Matrix();
