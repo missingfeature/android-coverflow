@@ -356,7 +356,7 @@ public class CoverFlowView extends LinearLayout {
 				setSelectedCover(newCover);
 				// Notify listener
 				if (null != mListener && null != mListener.get())
-					mListener.get().onSelectionChanged(this,
+					mListener.get().onSelectionChanging(this,
 							mSelectedCoverView.getNumber());
 			}
 			break;
@@ -653,6 +653,7 @@ public class CoverFlowView extends LinearLayout {
 	}
 
 	public interface Listener {
+		public void onSelectionChanging(CoverFlowView coverFlow, int index);
 		public void onSelectionChanged(CoverFlowView coverFlow, int index);
 	}
 
