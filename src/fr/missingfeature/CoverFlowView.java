@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,6 +16,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -50,7 +53,10 @@ public class CoverFlowView extends LinearLayout {
 
 	boolean mIsSingleTap;
 	boolean mIsDraggingCover;
-	float mStartPosition;
+	float mStartScrollX;
+	float mStartX;
+
+	SortedSet<Integer> mTouchedCovers = new TreeSet<Integer>();
 
 	public CoverFlowView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs);
@@ -97,6 +103,12 @@ public class CoverFlowView extends LinearLayout {
 		CoverFlowItem coverItem = dequeueReusableCover();
 		if (null == coverItem) {
 			coverItem = new CoverFlowItem(getContext());
+			coverItem.setOnTouchListener(new OnTouchListener() {
+				public boolean onTouch(View v, MotionEvent event) {
+					onTouchItem((CoverFlowItem) v, event);
+					return false;
+				}
+			});
 		}
 		coverItem.setNumber(coverIndex);
 		return coverItem;
@@ -318,14 +330,23 @@ public class CoverFlowView extends LinearLayout {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			mIsSingleTap = event.getPointerCount() == 1;
+			if (mIsSingleTap)
+				mStartX = event.getX(0);
 			mBeginningCover = mSelectedCoverView.getNumber();
-			mStartPosition = event.getX(0) + mScrollView.getScrollX();
+			mStartScrollX = event.getX(0) + mScrollView.getScrollX();
 			break;
 		case MotionEvent.ACTION_MOVE:
-			mIsSingleTap = false;
-			int offset = (int) (mStartPosition - event.getX(0));
-			mScrollView.scrollTo(offset, mScrollView.getScrollY());
-			int newCover = offset / CoverFlowConstants.COVER_SPACING;
+			int scrollOffset = (int) (mStartScrollX- event.getX(0));
+			int xOffset = (int)Math.abs(event.getX(0) - mStartX);
+			
+			// If finger moves too much, not a single tap anymore:
+			mIsSingleTap = mIsSingleTap && (xOffset < 20);
+			
+			// Update the scroll position
+			mScrollView.scrollTo(scrollOffset, mScrollView.getScrollY());
+			
+			// Select new cover
+			int newCover = scrollOffset / CoverFlowConstants.COVER_SPACING;
 
 			// make sure we're not out of bounds:
 			if (newCover < 0)
@@ -343,6 +364,14 @@ public class CoverFlowView extends LinearLayout {
 			}
 			break;
 		case MotionEvent.ACTION_UP:
+			if (mIsSingleTap && 0 < mTouchedCovers.size()) {
+				int lowest = mTouchedCovers.first();
+				int highest = mTouchedCovers.last();
+				if (mSelectedCoverView.getNumber() < lowest)
+					setSelectedCover(lowest);
+				else if (mSelectedCoverView.getNumber() > highest)
+					setSelectedCover(highest);
+			}
 			// Smooth scroll to the center of the cover
 			mScrollView.smoothScrollTo(mSelectedCoverView.getNumber()
 					* CoverFlowConstants.COVER_SPACING, mScrollView
@@ -354,10 +383,18 @@ public class CoverFlowView extends LinearLayout {
 					mListener.get().onSelectionChanged(this,
 							mSelectedCoverView.getNumber());
 			}
+			
+			// Clear touched covers
+			mTouchedCovers.clear();
+
 			break;
 		}
 
 		return true;
+	}
+
+	void onTouchItem(CoverFlowItem cover, MotionEvent event) {
+		mTouchedCovers.add(cover.getNumber());
 	}
 
 	public void setNumberOfImages(int numberOfImages) {
@@ -664,7 +701,6 @@ public class CoverFlowView extends LinearLayout {
 			if (mStatic)
 				t.setAlpha(interpolatedTime < 1.0f ? 0 : 1);
 
-			Log.d(TAG, "iterpolatedtime:" + interpolatedTime);
 			float angleDegrees = mStartAngleDegrees + interpolatedTime
 					* (mStopAngleDegrees - mStartAngleDegrees);
 			float zOffset = mStartZOffset + interpolatedTime
