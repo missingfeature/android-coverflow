@@ -11,14 +11,12 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 public class CoverFlowItem extends ImageView {
 
 	int mNumber;
 	int mHorizontalPosition = 0;
-	int mVerticalPosition = 0;
 	int mOriginalImageHeight;
 	int mBitmapWidth = 0;
 	int mBitmapHeight = 0;
@@ -64,21 +62,11 @@ public class CoverFlowItem extends ImageView {
 		return mHorizontalPosition - (int)(mBitmapWidth / 2.0f);
 	}
 
-	public void setVerticalPosition(int vp) {
-		mVerticalPosition = vp;
-	}
-
-	public int getVerticalPosition() {
-		return mVerticalPosition;
-	}
-
 	public void setImageBitmap(Bitmap bitmap, int originalImageHeight,
 			float reflectionFraction) {
-		mVerticalPosition = (int) (originalImageHeight * reflectionFraction / 2);
 		mOriginalImageHeight = originalImageHeight;
 		mBitmapWidth = bitmap.getWidth();
 		mBitmapHeight = bitmap.getHeight();
-		// CHECK: this calls invalidate() and requestLayout(), should be enough
 		setImageBitmap(bitmap);
 	}
 

@@ -137,8 +137,8 @@ public class CoverFlowView extends LinearLayout {
 
 		int coverNumber = cover.getNumber();
 		int newX = mHalfScreenWidth + cover.getHorizontalPosition();
-		int newY = 0; // TODO: check me mHalfScreenHeight +
-		// cover.getVerticalPosition();
+		int newY = mHalfScreenHeight - cover.getBitmapHeight() / 2;
+
 
 		ItemAnimation oldAnimation = (ItemAnimation) cover.getAnimation();
 		float oldAngle = oldAnimation != null ? oldAnimation
@@ -226,7 +226,7 @@ public class CoverFlowView extends LinearLayout {
 		params.setMargins(newX, newY, 0, 0);
 		params.gravity = Gravity.LEFT | Gravity.TOP;
 		cover.setLayoutParams(params);
-		// cover.requestLayout();
+
 		if (null != anim)
 			cover.startAnimation(anim);
 	}
@@ -298,9 +298,6 @@ public class CoverFlowView extends LinearLayout {
 				LayoutParams.FILL_PARENT);
 		mItemContainer.setLayoutParams(params);
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		// mScrollView.measure(widthMeasureSpec, heightMeasureSpec);
-		// setMeasuredDimension(mScrollView.getMeasuredWidth(), mScrollView
-		// .getMeasuredHeight());
 	}
 
 	@Override

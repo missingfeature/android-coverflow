@@ -45,8 +45,8 @@ public class CoverFlowActivity extends Activity implements
 		mCoverflow.setDataSource(this);
 		mCoverflow.setListener(this);
 		mCoverflow.setNumberOfImages(10/* mBitmaps.length */);
-		mCoverflow.setSelectedCover(8);
-		mCoverflow.centerOnSelectedCover(false);
+//		mCoverflow.setSelectedCover(8);
+//		mCoverflow.centerOnSelectedCover(false);
 	}
 
 	@Override
