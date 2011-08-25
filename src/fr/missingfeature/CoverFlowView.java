@@ -101,6 +101,8 @@ public class CoverFlowView extends LinearLayout {
 		CoverFlowItem coverItem = dequeueReusableCover();
 		if (null == coverItem) {
 			coverItem = new CoverFlowItem(getContext());
+			coverItem.setLayoutParams(new ViewGroup.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			coverItem.setOnTouchListener(new OnTouchListener() {
 				public boolean onTouch(View v, MotionEvent event) {
 					onTouchItem((CoverFlowItem) v, event);
@@ -146,15 +148,13 @@ public class CoverFlowView extends LinearLayout {
 
 		ItemAnimation anim = null;
 
-		ViewGroup.LayoutParams layoutParams = cover.getLayoutParams();
-
 		if (coverNumber < selectedCover) {
 			if (oldAngle != CoverFlowConstants.SIDE_COVER_ANGLE
 					|| oldXOffset != -CoverFlowConstants.CENTER_COVER_OFFSET
 					|| oldZOffset != CoverFlowConstants.SIDE_COVER_ZPOSITION) {
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, CoverFlowConstants.SIDE_COVER_ANGLE);
-				anim.setViewDimensions(layoutParams.width, cover
+				anim.setViewDimensions(cover.getBitmapWidth(), cover
 						.getOriginalImageHeight());
 				anim.setXTranslation(oldXOffset,
 						-CoverFlowConstants.CENTER_COVER_OFFSET);
@@ -174,7 +174,7 @@ public class CoverFlowView extends LinearLayout {
 				anim
 						.setRotation(oldAngle,
 								-CoverFlowConstants.SIDE_COVER_ANGLE);
-				anim.setViewDimensions(layoutParams.width, cover
+				anim.setViewDimensions(cover.getBitmapWidth(), cover
 						.getOriginalImageHeight());
 				anim.setXTranslation(oldXOffset,
 						CoverFlowConstants.CENTER_COVER_OFFSET);
@@ -194,7 +194,7 @@ public class CoverFlowView extends LinearLayout {
 				// oldAngle, oldXOffset, oldZOffset));
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, 0);
-				anim.setViewDimensions(layoutParams.width, cover
+				anim.setViewDimensions(cover.getBitmapWidth(), cover
 						.getOriginalImageHeight());
 				anim.setXTranslation(oldXOffset, 0);
 				anim.setZTranslation(oldZOffset, 0);

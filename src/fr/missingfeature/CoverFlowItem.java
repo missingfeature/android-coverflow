@@ -21,6 +21,7 @@ public class CoverFlowItem extends ImageView {
 	int mVerticalPosition = 0;
 	int mOriginalImageHeight;
 	int mBitmapWidth = 0;
+	int mBitmapHeight = 0;
 
 	public CoverFlowItem(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -39,6 +40,14 @@ public class CoverFlowItem extends ImageView {
 		mHorizontalPosition = n * CoverFlowConstants.COVER_SPACING;
 	}
 
+	public int getBitmapWidth() {
+		return mBitmapWidth;
+	}
+	
+	public int getBitmapHeight() {
+		return mBitmapHeight;
+	}
+	
 	public int getNumber() {
 		return mNumber;
 	}
@@ -68,8 +77,7 @@ public class CoverFlowItem extends ImageView {
 		mVerticalPosition = (int) (originalImageHeight * reflectionFraction / 2);
 		mOriginalImageHeight = originalImageHeight;
 		mBitmapWidth = bitmap.getWidth();
-		setLayoutParams(new ViewGroup.LayoutParams(mBitmapWidth, bitmap
-				.getHeight()));
+		mBitmapHeight = bitmap.getHeight();
 		// CHECK: this calls invalidate() and requestLayout(), should be enough
 		setImageBitmap(bitmap);
 	}
