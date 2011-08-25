@@ -148,7 +148,7 @@ public class CoverFlowView extends LinearLayout {
 				anim.setViewDimensions(layoutParams.width, cover.getOriginalImageHeight());
 				anim.setXTranslation(oldXOffset, -CoverFlowConstants.CENTER_COVER_OFFSET);
 				anim.setZTranslation(oldZOffset, CoverFlowConstants.SIDE_COVER_ZPOSITION);
-				if (animated) anim.setDuration(2000);
+				if (animated) anim.setDuration(CoverFlowConstants.BLUR_ANIMATION_DURATION);
 				else anim.setStatic();
 			}
 		} else if (coverNumber > selectedCover) {
@@ -160,7 +160,8 @@ public class CoverFlowView extends LinearLayout {
 				anim.setViewDimensions(layoutParams.width, cover.getOriginalImageHeight());
 				anim.setXTranslation(oldXOffset, CoverFlowConstants.CENTER_COVER_OFFSET);
 				anim.setZTranslation(oldZOffset, CoverFlowConstants.SIDE_COVER_ZPOSITION);
-				if (animated) anim.setDuration(2000);
+				if (animated) anim.setDuration(CoverFlowConstants.BLUR_ANIMATION_DURATION);
+				
 				else anim.setStatic();
 			}
 		} else {
@@ -173,7 +174,7 @@ public class CoverFlowView extends LinearLayout {
 				anim.setViewDimensions(layoutParams.width, cover.getOriginalImageHeight());
 				anim.setXTranslation(oldXOffset, 0);
 				anim.setZTranslation(oldZOffset, 0);
-				if (animated) anim.setDuration(3000);
+				if (animated) anim.setDuration(CoverFlowConstants.FOCUS_ANIMATION_DURATION);
 				else anim.setStatic();
 				anim.setAnimationListener(new Animation.AnimationListener() {
 					public void onAnimationStart(Animation animation) {
