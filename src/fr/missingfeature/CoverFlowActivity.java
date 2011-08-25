@@ -76,4 +76,8 @@ public class CoverFlowActivity extends Activity implements
 	public void onSelectionChanging(CoverFlowView coverFlow, int index) {
 		Log.d(TAG, String.format("Selection is changing: %d", index));
 	}
+
+	public void onSelectionClicked(CoverFlowView coverFlow, int index) {
+		Log.d(TAG, String.format("Selection clicked: %d", index));
+	}
 }

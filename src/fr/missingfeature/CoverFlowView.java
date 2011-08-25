@@ -214,9 +214,6 @@ public class CoverFlowView extends LinearLayout {
 			}
 		} else {
 			if (oldAngle != 0 || oldXOffset != 0 || oldZOffset != 0) {
-				// Log.d(TAG,
-				// String.format("oldAngle:%.2f oldXOffset:%d oldZOffset:%d",
-				// oldAngle, oldXOffset, oldZOffset));
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, 0);
 				anim.setViewDimensions(cover.getBitmapWidth(), cover
@@ -355,26 +352,29 @@ public class CoverFlowView extends LinearLayout {
 			// If finger moves too much, not a single tap anymore:
 			mIsSingleTap = mIsSingleTap && (xOffset < 20);
 
-			// Update the scroll position
-			mScrollView.scrollTo(scrollOffset, mScrollView.getScrollY());
+			if (!mIsSingleTap) {
+				// Update the scroll position
+				mScrollView.scrollTo(scrollOffset, mScrollView.getScrollY());
 
-			// Select new cover
-			int newCover = scrollOffset / mConfig.COVER_SPACING;
+				// Select new cover
+				int newCover = scrollOffset / mConfig.COVER_SPACING;
 
-			// make sure we're not out of bounds:
-			if (newCover < 0)
-				newCover = 0;
-			else if (newCover >= mNumberOfImages)
-				newCover = mNumberOfImages - 1;
+				// make sure we're not out of bounds:
+				if (newCover < 0)
+					newCover = 0;
+				else if (newCover >= mNumberOfImages)
+					newCover = mNumberOfImages - 1;
 
-			// Select newCover if appropriate
-			if (newCover != mSelectedCoverView.getNumber()) {
-				setSelectedCover(newCover);
-				// Notify listener
-				if (null != mListener && null != mListener.get())
-					mListener.get().onSelectionChanging(this,
-							mSelectedCoverView.getNumber());
+				// Select newCover if appropriate
+				if (newCover != mSelectedCoverView.getNumber()) {
+					setSelectedCover(newCover);
+					// Notify listener
+					if (null != mListener && null != mListener.get())
+						mListener.get().onSelectionChanging(this,
+								mSelectedCoverView.getNumber());
+				}
 			}
+				
 			break;
 		case MotionEvent.ACTION_UP:
 			if (mIsSingleTap && 0 < mTouchedCovers.size()) {
@@ -384,6 +384,11 @@ public class CoverFlowView extends LinearLayout {
 					setSelectedCover(lowest);
 				else if (mSelectedCoverView.getNumber() > highest)
 					setSelectedCover(highest);
+				else if (lowest <= mSelectedCoverView.getNumber()
+						&& highest >= mSelectedCoverView.getNumber()
+						&& null != mListener && null != mListener.get())
+					mListener.get().onSelectionClicked(this, mSelectedCoverView.getNumber());
+					
 			}
 			// Smooth scroll to the center of the cover
 			mScrollView.smoothScrollTo(mSelectedCoverView.getNumber()
@@ -671,6 +676,7 @@ public class CoverFlowView extends LinearLayout {
 	public interface Listener {
 		public void onSelectionChanging(CoverFlowView coverFlow, int index);
 		public void onSelectionChanged(CoverFlowView coverFlow, int index);
+		public void onSelectionClicked(CoverFlowView coverFlow, int index);
 	}
 
 	public static class ItemAnimation extends Animation {
