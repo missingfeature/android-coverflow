@@ -16,7 +16,6 @@ import android.widget.ImageView;
 public class CoverFlowItem extends ImageView {
 
 	int mNumber;
-	int mHorizontalPosition = 0;
 	int mOriginalImageHeight;
 	int mBitmapWidth = 0;
 	int mBitmapHeight = 0;
@@ -35,7 +34,6 @@ public class CoverFlowItem extends ImageView {
 
 	public void setNumber(int n) {
 		mNumber = n;
-		mHorizontalPosition = n * CoverFlowConstants.COVER_SPACING;
 	}
 
 	public int getBitmapWidth() {
@@ -54,14 +52,6 @@ public class CoverFlowItem extends ImageView {
 		return mOriginalImageHeight;
 	}
 	
-	public void setHorizontalPosition(int hp) {
-		mHorizontalPosition = hp;
-	}
-
-	public int getHorizontalPosition() {
-		return mHorizontalPosition - (int)(mBitmapWidth / 2.0f);
-	}
-
 	public void setImageBitmap(Bitmap bitmap, int originalImageHeight,
 			float reflectionFraction) {
 		mOriginalImageHeight = originalImageHeight;
@@ -120,8 +110,8 @@ public class CoverFlowItem extends ImageView {
 		}
 	}
 
-	static Bitmap createReflectedBitmap(Bitmap b, float reflectionFraction) {
-		if (0 == reflectionFraction && 0 == CoverFlowConstants.DROP_SHADOW_RADIUS)
+	static Bitmap createReflectedBitmap(Bitmap b, float reflectionFraction, int dropShadowRadius) {
+		if (0 == reflectionFraction && 0 == dropShadowRadius)
 			return b;
 		
 		Bitmap reflection;
@@ -129,7 +119,7 @@ public class CoverFlowItem extends ImageView {
 		Matrix matrix = new Matrix();
 		matrix.preScale(1, -1);
 
-		int padding = CoverFlowConstants.DROP_SHADOW_RADIUS;
+		int padding = dropShadowRadius;
 
 		// Create the reflection
 		reflection = Bitmap.createBitmap(b, 0, (int)(b.getHeight() * (1 - reflectionFraction)), b
