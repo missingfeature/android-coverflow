@@ -15,7 +15,6 @@ public class CoverFlowActivity extends Activity implements
 	private static final String TAG = "CoverFlowActivity";
 	private Bitmap[] mBitmaps;
 	private CoverFlowView mCoverflow;
-	int mIndex = 0;
 
 	public static final int NUMBER_OF_IMAGES = 30;
 
@@ -46,6 +45,8 @@ public class CoverFlowActivity extends Activity implements
 		mCoverflow.setDataSource(this);
 		mCoverflow.setListener(this);
 		mCoverflow.setNumberOfImages(10/* mBitmaps.length */);
+		mCoverflow.setSelectedCover(8);
+		mCoverflow.centerOnSelectedCover(false);
 	}
 
 	@Override
@@ -70,15 +71,6 @@ public class CoverFlowActivity extends Activity implements
 
 	public void onSelectionChanged(CoverFlowView coverFlow, int index) {
 		Log.d(TAG, String.format("Selection did change: %d", index));
-	}
-
-	public void onClickNext(View v) {
-		mCoverflow.setSelectedCover(++mIndex);
-	}
-
-	public void onClickPrevious(View v) {
-		if (mIndex > 0)
-			mCoverflow.setSelectedCover(--mIndex);
 	}
 
 }

@@ -82,7 +82,6 @@ public class CoverFlowView extends LinearLayout {
 				return CoverFlowView.this.onTouchEvent(event);
 			}
 		});
-		mScrollView.setBackgroundColor(0xFFFF0000);
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
 				LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		mScrollView.setLayoutParams(params);
@@ -94,7 +93,6 @@ public class CoverFlowView extends LinearLayout {
 
 		// Create the item container
 		mItemContainer = new FrameLayout(getContext());
-		mItemContainer.setBackgroundColor(0xFF00FF00);
 		linearLayout.addView(mItemContainer);
 
 	}
@@ -336,15 +334,15 @@ public class CoverFlowView extends LinearLayout {
 			mStartScrollX = event.getX(0) + mScrollView.getScrollX();
 			break;
 		case MotionEvent.ACTION_MOVE:
-			int scrollOffset = (int) (mStartScrollX- event.getX(0));
-			int xOffset = (int)Math.abs(event.getX(0) - mStartX);
-			
+			int scrollOffset = (int) (mStartScrollX - event.getX(0));
+			int xOffset = (int) Math.abs(event.getX(0) - mStartX);
+
 			// If finger moves too much, not a single tap anymore:
 			mIsSingleTap = mIsSingleTap && (xOffset < 20);
-			
+
 			// Update the scroll position
 			mScrollView.scrollTo(scrollOffset, mScrollView.getScrollY());
-			
+
 			// Select new cover
 			int newCover = scrollOffset / CoverFlowConstants.COVER_SPACING;
 
@@ -383,7 +381,7 @@ public class CoverFlowView extends LinearLayout {
 					mListener.get().onSelectionChanged(this,
 							mSelectedCoverView.getNumber());
 			}
-			
+
 			// Clear touched covers
 			mTouchedCovers.clear();
 
@@ -430,14 +428,17 @@ public class CoverFlowView extends LinearLayout {
 		mListener = new WeakReference<Listener>(listener);
 	}
 
-	public void centerOnSelectedCover(boolean animated) {
-		int offset = CoverFlowConstants.COVER_SPACING
+	public void centerOnSelectedCover(final boolean animated) {
+		final int offset = CoverFlowConstants.COVER_SPACING
 				* mSelectedCoverView.getNumber();
-		if (animated) {
-			mScrollView.smoothScrollTo(offset, 0);
-		} else {
-			mScrollView.scrollTo(offset, 0);
-		}
+		mScrollView.post(new Runnable() {
+			public void run() {
+				if (animated)
+					mScrollView.smoothScrollTo(offset, 0);
+				else
+					mScrollView.scrollTo(offset, 0);
+			}
+		});
 	}
 
 	public void setSelectedCover(int newSelectedCover) {
