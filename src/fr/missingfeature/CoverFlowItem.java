@@ -138,20 +138,23 @@ public class CoverFlowItem extends ImageView {
 		Matrix matrix = new Matrix();
 		matrix.preScale(1, -1);
 
-		int padding = 15;
+		int padding = CoverFlowConstants.DROP_SHADOW_RADIUS;
 
-		// reflection = Bitmap.createBitmap(source, x, y, width, height, m,
-		// filter);
+		// Create the reflection
 		reflection = Bitmap.createBitmap(b, 0, (int)(b.getHeight() * (1 - reflectionFraction)), b
 				.getWidth(), (int)(b.getHeight() * reflectionFraction), matrix, false);
 
+		// Create the result bitmap, in which we'll print the
+		// original bitmap and its reflection
 		result = Bitmap.createBitmap(b.getWidth() + padding * 2, 2 * padding
 				+ (int)(b.getHeight() * (1 + reflectionFraction)), Config.ARGB_8888);
 
+		// We'll work in a canvas
 		Canvas canvas = new Canvas(result);
 
+		// Add a drop shadow
 		Paint dropShadow = new Paint();
-		dropShadow.setShadowLayer(5.0f, 0, 0, 0xFF000000);
+		dropShadow.setShadowLayer(padding, 0, 0, 0xFF000000);
 		canvas.drawRect(padding, padding, b.getWidth() + padding, result
 				.getHeight()
 				- padding, dropShadow);
