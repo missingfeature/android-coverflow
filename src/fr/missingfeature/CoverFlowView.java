@@ -144,24 +144,38 @@ public class CoverFlowView extends LinearLayout {
 					|| oldZOffset != CoverFlowConstants.SIDE_COVER_ZPOSITION) {
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, CoverFlowConstants.SIDE_COVER_ANGLE);
-				anim.setViewDimensions(layoutParams.width, cover.getOriginalImageHeight());
-				anim.setXTranslation(oldXOffset, -CoverFlowConstants.CENTER_COVER_OFFSET);
-				anim.setZTranslation(oldZOffset, CoverFlowConstants.SIDE_COVER_ZPOSITION);
-				if (animated) anim.setDuration(CoverFlowConstants.BLUR_ANIMATION_DURATION);
-				else anim.setStatic();
+				anim.setViewDimensions(layoutParams.width, cover
+						.getOriginalImageHeight());
+				anim.setXTranslation(oldXOffset,
+						-CoverFlowConstants.CENTER_COVER_OFFSET);
+				anim.setZTranslation(oldZOffset,
+						CoverFlowConstants.SIDE_COVER_ZPOSITION);
+				if (animated)
+					anim
+							.setDuration(CoverFlowConstants.BLUR_ANIMATION_DURATION);
+				else
+					anim.setStatic();
 			}
 		} else if (coverNumber > selectedCover) {
 			if (oldAngle != -CoverFlowConstants.SIDE_COVER_ANGLE
 					|| oldXOffset != CoverFlowConstants.CENTER_COVER_OFFSET
 					|| oldZOffset != CoverFlowConstants.SIDE_COVER_ZPOSITION) {
 				anim = new ItemAnimation();
-				anim.setRotation(oldAngle, -CoverFlowConstants.SIDE_COVER_ANGLE);
-				anim.setViewDimensions(layoutParams.width, cover.getOriginalImageHeight());
-				anim.setXTranslation(oldXOffset, CoverFlowConstants.CENTER_COVER_OFFSET);
-				anim.setZTranslation(oldZOffset, CoverFlowConstants.SIDE_COVER_ZPOSITION);
-				if (animated) anim.setDuration(CoverFlowConstants.BLUR_ANIMATION_DURATION);
-				
-				else anim.setStatic();
+				anim
+						.setRotation(oldAngle,
+								-CoverFlowConstants.SIDE_COVER_ANGLE);
+				anim.setViewDimensions(layoutParams.width, cover
+						.getOriginalImageHeight());
+				anim.setXTranslation(oldXOffset,
+						CoverFlowConstants.CENTER_COVER_OFFSET);
+				anim.setZTranslation(oldZOffset,
+						CoverFlowConstants.SIDE_COVER_ZPOSITION);
+				if (animated)
+					anim
+							.setDuration(CoverFlowConstants.BLUR_ANIMATION_DURATION);
+
+				else
+					anim.setStatic();
 			}
 		} else {
 			if (oldAngle != 0 || oldXOffset != 0 || oldZOffset != 0) {
@@ -170,11 +184,15 @@ public class CoverFlowView extends LinearLayout {
 				// oldAngle, oldXOffset, oldZOffset));
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, 0);
-				anim.setViewDimensions(layoutParams.width, cover.getOriginalImageHeight());
+				anim.setViewDimensions(layoutParams.width, cover
+						.getOriginalImageHeight());
 				anim.setXTranslation(oldXOffset, 0);
 				anim.setZTranslation(oldZOffset, 0);
-				if (animated) anim.setDuration(CoverFlowConstants.FOCUS_ANIMATION_DURATION);
-				else anim.setStatic();
+				if (animated)
+					anim
+							.setDuration(CoverFlowConstants.FOCUS_ANIMATION_DURATION);
+				else
+					anim.setStatic();
 				anim.setAnimationListener(new Animation.AnimationListener() {
 					public void onAnimationStart(Animation animation) {
 					}
@@ -196,7 +214,7 @@ public class CoverFlowView extends LinearLayout {
 		params.setMargins(newX, newY, 0, 0);
 		params.gravity = Gravity.LEFT | Gravity.TOP;
 		cover.setLayoutParams(params);
-//		cover.requestLayout();
+		// cover.requestLayout();
 		if (null != anim)
 			cover.startAnimation(anim);
 	}
@@ -295,9 +313,9 @@ public class CoverFlowView extends LinearLayout {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-//		return super.onTouchEvent(event);
-		
-		switch(event.getAction()) {
+		// return super.onTouchEvent(event);
+
+		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			mIsSingleTap = event.getPointerCount() == 1;
 			mBeginningCover = mSelectedCoverView.getNumber();
@@ -305,26 +323,40 @@ public class CoverFlowView extends LinearLayout {
 			break;
 		case MotionEvent.ACTION_MOVE:
 			mIsSingleTap = false;
-			int offset = (int)(mStartPosition - event.getX(0));
+			int offset = (int) (mStartPosition - event.getX(0));
 			mScrollView.scrollTo(offset, mScrollView.getScrollY());
 			int newCover = offset / CoverFlowConstants.COVER_SPACING;
+
+			// make sure we're not out of bounds:
+			if (newCover < 0)
+				newCover = 0;
+			else if (newCover >= mNumberOfImages)
+				newCover = mNumberOfImages - 1;
+
+			// Select newCover if appropriate
 			if (newCover != mSelectedCoverView.getNumber()) {
-				if (newCover < 0)
-					setSelectedCover(0);
-				else if (newCover >= mNumberOfImages)
-					setSelectedCover(mNumberOfImages - 1);
-				else
-					setSelectedCover(newCover);
+				setSelectedCover(newCover);
+				// Notify listener
+				if (null != mListener && null != mListener.get())
+					mListener.get().onSelectionChanged(this,
+							mSelectedCoverView.getNumber());
 			}
 			break;
 		case MotionEvent.ACTION_UP:
+			// Smooth scroll to the center of the cover
+			mScrollView.smoothScrollTo(mSelectedCoverView.getNumber()
+					* CoverFlowConstants.COVER_SPACING, mScrollView
+					.getScrollY());
+
 			if (mBeginningCover != mSelectedCoverView.getNumber()) {
+				// Notify listener
 				if (null != mListener && null != mListener.get())
-					mListener.get().onSelectionChanged(this, mSelectedCoverView.getNumber());
+					mListener.get().onSelectionChanged(this,
+							mSelectedCoverView.getNumber());
 			}
 			break;
 		}
-		
+
 		return true;
 	}
 
@@ -375,7 +407,7 @@ public class CoverFlowView extends LinearLayout {
 		if (null != mSelectedCoverView
 				&& newSelectedCover == mSelectedCoverView.getNumber())
 			return;
-		
+
 		if (newSelectedCover >= mNumberOfImages)
 			return;
 
@@ -410,7 +442,8 @@ public class CoverFlowView extends LinearLayout {
 			mSelectedCoverView = cover;
 			return;
 		} else {
-			layoutZ(mSelectedCoverView.getNumber(), mLowerVisibleCover, mUpperVisibleCover);
+			layoutZ(mSelectedCoverView.getNumber(), mLowerVisibleCover,
+					mUpperVisibleCover);
 
 		}
 
@@ -576,27 +609,27 @@ public class CoverFlowView extends LinearLayout {
 			setFillAfter(true);
 			setFillBefore(true);
 		}
-		
+
 		public void setStatic() {
 			mStatic = true;
 			setDuration(0);
 		}
-		
+
 		public void setRotation(float start, float stop) {
 			mStartAngleDegrees = start;
 			mStopAngleDegrees = stop;
 		}
-		
+
 		public void setXTranslation(int start, int stop) {
 			mStartXOffset = start;
 			mStopXOffset = stop;
 		}
-		
+
 		public void setZTranslation(int start, int stop) {
 			mStartZOffset = start;
 			mStopZOffset = stop;
 		}
-		
+
 		public void setViewDimensions(int width, int height) {
 			mViewWidth = width;
 			mViewHeight = height;
@@ -625,11 +658,12 @@ public class CoverFlowView extends LinearLayout {
 		@Override
 		protected void applyTransformation(float interpolatedTime,
 				Transformation t) {
-			t.setTransformationType(mStatic ? Transformation.TYPE_BOTH : Transformation.TYPE_MATRIX);
+			t.setTransformationType(mStatic ? Transformation.TYPE_BOTH
+					: Transformation.TYPE_MATRIX);
 
 			if (mStatic)
 				t.setAlpha(interpolatedTime < 1.0f ? 0 : 1);
-			
+
 			Log.d(TAG, "iterpolatedtime:" + interpolatedTime);
 			float angleDegrees = mStartAngleDegrees + interpolatedTime
 					* (mStopAngleDegrees - mStartAngleDegrees);
