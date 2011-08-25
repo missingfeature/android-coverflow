@@ -255,11 +255,6 @@ public class CoverFlowView extends LinearLayout {
 
 	}
 
-	CoverFlowItem findCoverOnScreen(MotionEvent event) {
-		// TODO: write me
-		return null;
-	}
-
 	CoverFlowItem dequeueReusableCover() {
 		CoverFlowItem item = null;
 		if (!mOffscreenCovers.isEmpty()) {
