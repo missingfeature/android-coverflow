@@ -283,16 +283,29 @@ public class CoverFlowView extends LinearLayout {
 		Bitmap bitmapWithReflection = CoverFlowItem
 				.createReflectedBitmap(bitmap, mConfig.REFLECTION_FRACTION,
 						mConfig.DROP_SHADOW_RADIUS);
+		setReflectedBitmapForIndex(bitmapWithReflection, index);
+	}
+	
+	public void setReflectedBitmapForIndex(Bitmap bitmapWithReflection, int index) {
 		mCoverImages.put(index, bitmapWithReflection);
-		mCoverImageHeights.put(index, bitmap.getHeight());
+		mCoverImages.put(index, bitmapWithReflection);
+		int originalHeight = (int)((int)(bitmapWithReflection.getHeight() - 2 * mConfig.DROP_SHADOW_RADIUS) / (1 + mConfig.REFLECTION_FRACTION));
+		mCoverImageHeights.put(index, originalHeight);
 
 		// If this cover is onscreen, set its image and call layoutCover.
 		CoverFlowItem cover = mOnscreenCovers.get(index);
 		if (null != cover) {
-			cover.setImageBitmap(bitmapWithReflection, bitmap.getHeight(),
+			cover.setImageBitmap(bitmapWithReflection, originalHeight,
 					mConfig.REFLECTION_FRACTION);
 			layoutCover(cover, mSelectedCoverView.getNumber(), false);
 		}
+	}
+	
+	public Bitmap[] getReflectedBitmaps() {
+		Bitmap[] result = new Bitmap[mCoverImages.size()];
+		for (int i = 0; i < result.length; i++)
+			result[i] = mCoverImages.get(i);
+		return result;
 	}
 
 	//

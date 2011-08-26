@@ -10,13 +10,21 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class CoverFlowActivity extends Activity implements
-		CoverFlowView.DataSource, CoverFlowView.Listener {
+		CoverFlowView.Listener {
 	private static final String TAG = "CoverFlowActivity";
-	private Bitmap[] mBitmaps;
 	private CoverFlowView mCoverflow;
+	private Bitmap[] mReflectedBitmaps;
+	private boolean mCoverflowCleared = false;
 
 	public static final int NUMBER_OF_IMAGES = 30;
 
+	/**
+	 * Get an array of Bitmaps for our sample images
+	 * 
+	 * @param c
+	 * @return
+	 * @throws IOException
+	 */
 	public static Bitmap[] getBitmaps(Context c) throws IOException {
 		Bitmap[] result = new Bitmap[NUMBER_OF_IMAGES];
 		for (int i = 0; i < NUMBER_OF_IMAGES; i++) {
@@ -32,26 +40,50 @@ public class CoverFlowActivity extends Activity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.coverflow);
 
+		// Find the coverflow
 		mCoverflow = (CoverFlowView) findViewById(R.id.coverflow);
+
+		// Get the bitmaps
+		Bitmap[] bitmaps = null;
 		try {
-			mBitmaps = getBitmaps(this);
+			bitmaps = getBitmaps(this);
 		} catch (IOException e) {
 			Log.e(TAG, "Could not load bitmaps", e);
 		}
-		
-		for (int i = 0; mBitmaps != null && i < mBitmaps.length ; i++) {
-			mCoverflow.setBitmapForIndex(mBitmaps[i], i);
-		}
-		mCoverflow.setDataSource(this);
+
+		// Listen to the coverflow
 		mCoverflow.setListener(this);
-		mCoverflow.setNumberOfImages(mBitmaps.length);
-//		mCoverflow.setSelectedCover(8);
-//		mCoverflow.centerOnSelectedCover(false);
+
+		// Fill in images
+		for (int i = 0; bitmaps != null && i < bitmaps.length; i++) {
+			mCoverflow.setBitmapForIndex(bitmaps[i], i);
+		}
+		mCoverflow.setNumberOfImages(bitmaps.length);
+
+		// Cache the reflected bitmaps
+		mReflectedBitmaps = mCoverflow.getReflectedBitmaps();
 	}
 
 	@Override
 	protected void onResume() {
+
+		// If we cleared the coverflow in onPause, resurrect it
+		if (mCoverflowCleared) {
+			for (int i = 0; i < mReflectedBitmaps.length; i++)
+				mCoverflow.setReflectedBitmapForIndex(mReflectedBitmaps[i], i);
+			mCoverflow.setNumberOfImages(mReflectedBitmaps.length);
+		}
+		mCoverflowCleared = false;
 		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		// Clear the coverflow to save memory
+		mCoverflow.clear();
+		mCoverflowCleared = true;
 	}
 
 	public Bitmap defaultBitmap() {
@@ -62,11 +94,6 @@ public class CoverFlowActivity extends Activity implements
 			Log.e(TAG, "Unable to get default image", e);
 		}
 		return null;
-	}
-
-	public void requestBitmapForIndex(CoverFlowView coverFlow, int index) {
-		coverFlow.setBitmapForIndex(mBitmaps[index], index);
-
 	}
 
 	public void onSelectionChanged(CoverFlowView coverFlow, int index) {
