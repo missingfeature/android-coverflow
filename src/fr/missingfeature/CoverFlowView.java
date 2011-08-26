@@ -22,10 +22,11 @@ import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ImageView.ScaleType;
 
 public class CoverFlowView extends LinearLayout {
 
-	public static class CoverFlowConfig {
+	public static class Config {
 		public int COVER_SPACING = 40;
 		public int CENTER_COVER_OFFSET = 70;
 		public float SIDE_COVER_ANGLE = 65;
@@ -37,9 +38,12 @@ public class CoverFlowView extends LinearLayout {
 		public int DROP_SHADOW_RADIUS = 15;
 		public boolean HORIZONTAL_SCROLLBAR_ENABLED = false;
 		public boolean FADING_EDGES_ENABLED = true;
+		public ViewGroup.LayoutParams IMAGE_VIEW_LAYOUT_PARAMS = new ViewGroup.LayoutParams(
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		public ScaleType IMAGE_VIEW_SCALE_TYPE = ScaleType.FIT_CENTER;
 	}
-	
-	CoverFlowConfig mConfig = new CoverFlowConfig();
+
+	Config mConfig = new Config();
 	WeakReference<DataSource> mDataSource;
 	WeakReference<Listener> mListener;
 	Set<CoverFlowItem> mOffscreenCovers = new HashSet<CoverFlowItem>();
@@ -66,7 +70,6 @@ public class CoverFlowView extends LinearLayout {
 	boolean mIsDraggingCover;
 	float mStartScrollX;
 	float mStartX;
-	
 
 	SortedSet<Integer> mTouchedCovers = new TreeSet<Integer>();
 
@@ -85,20 +88,20 @@ public class CoverFlowView extends LinearLayout {
 		setUpInitialState();
 	}
 
-	public CoverFlowConfig getConfig() {
+	public Config getConfig() {
 		return mConfig;
 	}
-	
+
 	void setUpInitialState() {
-		
+
 		// Create the scrollView
-		mScrollView = new ScrollView(getContext()){
+		mScrollView = new ScrollView(getContext()) {
 			// Catch trackball events
 			@Override
 			public boolean onTrackballEvent(MotionEvent event) {
 				return CoverFlowView.this.onTrackballEvent(event);
 			}
-			
+
 		};
 		mScrollView.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
@@ -108,8 +111,10 @@ public class CoverFlowView extends LinearLayout {
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
 				LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		mScrollView.setLayoutParams(params);
-		mScrollView.setHorizontalScrollBarEnabled(mConfig.HORIZONTAL_SCROLLBAR_ENABLED);
-		mScrollView.setHorizontalFadingEdgeEnabled(mConfig.FADING_EDGES_ENABLED);
+		mScrollView
+				.setHorizontalScrollBarEnabled(mConfig.HORIZONTAL_SCROLLBAR_ENABLED);
+		mScrollView
+				.setHorizontalFadingEdgeEnabled(mConfig.FADING_EDGES_ENABLED);
 		addView(mScrollView);
 
 		// Create an intermediate LinearLayout
@@ -126,8 +131,8 @@ public class CoverFlowView extends LinearLayout {
 		CoverFlowItem coverItem = dequeueReusableCover();
 		if (null == coverItem) {
 			coverItem = new CoverFlowItem(getContext());
-			coverItem.setLayoutParams(new ViewGroup.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+			coverItem.setLayoutParams(mConfig.IMAGE_VIEW_LAYOUT_PARAMS);
+			coverItem.setScaleType(mConfig.IMAGE_VIEW_SCALE_TYPE);
 			coverItem.setOnTouchListener(new OnTouchListener() {
 				public boolean onTouch(View v, MotionEvent event) {
 					onTouchItem((CoverFlowItem) v, event);
@@ -159,9 +164,9 @@ public class CoverFlowView extends LinearLayout {
 			return;
 
 		int coverNumber = cover.getNumber();
-		int newX = mHalfScreenWidth + cover.getNumber() * mConfig.COVER_SPACING - (int)(cover.getBitmapWidth() / 2.0f);
+		int newX = mHalfScreenWidth + cover.getNumber() * mConfig.COVER_SPACING
+				- (int) (cover.getBitmapWidth() / 2.0f);
 		int newY = mHalfScreenHeight - cover.getBitmapHeight() / 2;
-
 
 		ItemAnimation oldAnimation = (ItemAnimation) cover.getAnimation();
 		float oldAngle = oldAnimation != null ? oldAnimation
@@ -181,13 +186,10 @@ public class CoverFlowView extends LinearLayout {
 				anim.setRotation(oldAngle, mConfig.SIDE_COVER_ANGLE);
 				anim.setViewDimensions(cover.getBitmapWidth(), cover
 						.getOriginalImageHeight());
-				anim.setXTranslation(oldXOffset,
-						-mConfig.CENTER_COVER_OFFSET);
-				anim.setZTranslation(oldZOffset,
-						mConfig.SIDE_COVER_ZPOSITION);
+				anim.setXTranslation(oldXOffset, -mConfig.CENTER_COVER_OFFSET);
+				anim.setZTranslation(oldZOffset, mConfig.SIDE_COVER_ZPOSITION);
 				if (animated)
-					anim
-							.setDuration(mConfig.BLUR_ANIMATION_DURATION);
+					anim.setDuration(mConfig.BLUR_ANIMATION_DURATION);
 				else
 					anim.setStatic();
 			}
@@ -196,18 +198,13 @@ public class CoverFlowView extends LinearLayout {
 					|| oldXOffset != mConfig.CENTER_COVER_OFFSET
 					|| oldZOffset != mConfig.SIDE_COVER_ZPOSITION) {
 				anim = new ItemAnimation();
-				anim
-						.setRotation(oldAngle,
-								-mConfig.SIDE_COVER_ANGLE);
+				anim.setRotation(oldAngle, -mConfig.SIDE_COVER_ANGLE);
 				anim.setViewDimensions(cover.getBitmapWidth(), cover
 						.getOriginalImageHeight());
-				anim.setXTranslation(oldXOffset,
-						mConfig.CENTER_COVER_OFFSET);
-				anim.setZTranslation(oldZOffset,
-						mConfig.SIDE_COVER_ZPOSITION);
+				anim.setXTranslation(oldXOffset, mConfig.CENTER_COVER_OFFSET);
+				anim.setZTranslation(oldZOffset, mConfig.SIDE_COVER_ZPOSITION);
 				if (animated)
-					anim
-							.setDuration(mConfig.BLUR_ANIMATION_DURATION);
+					anim.setDuration(mConfig.BLUR_ANIMATION_DURATION);
 
 				else
 					anim.setStatic();
@@ -221,8 +218,7 @@ public class CoverFlowView extends LinearLayout {
 				anim.setXTranslation(oldXOffset, 0);
 				anim.setZTranslation(oldZOffset, 0);
 				if (animated)
-					anim
-							.setDuration(mConfig.FOCUS_ANIMATION_DURATION);
+					anim.setDuration(mConfig.FOCUS_ANIMATION_DURATION);
 				else
 					anim.setStatic();
 				anim.setAnimationListener(new Animation.AnimationListener() {
@@ -283,10 +279,11 @@ public class CoverFlowView extends LinearLayout {
 		}
 		return item;
 	}
-	
+
 	public void setBitmapForIndex(Bitmap bitmap, int index) {
-		Bitmap bitmapWithReflection = CoverFlowItem.createReflectedBitmap(
-				bitmap, mConfig.REFLECTION_FRACTION, mConfig.DROP_SHADOW_RADIUS);
+		Bitmap bitmapWithReflection = CoverFlowItem
+				.createReflectedBitmap(bitmap, mConfig.REFLECTION_FRACTION,
+						mConfig.DROP_SHADOW_RADIUS);
 		mCoverImages.put(index, bitmapWithReflection);
 		mCoverImageHeights.put(index, bitmap.getHeight());
 
@@ -374,7 +371,7 @@ public class CoverFlowView extends LinearLayout {
 								mSelectedCoverView.getNumber());
 				}
 			}
-				
+
 			break;
 		case MotionEvent.ACTION_UP:
 			if (mIsSingleTap && 0 < mTouchedCovers.size()) {
@@ -387,13 +384,13 @@ public class CoverFlowView extends LinearLayout {
 				else if (lowest <= mSelectedCoverView.getNumber()
 						&& highest >= mSelectedCoverView.getNumber()
 						&& null != mListener && null != mListener.get())
-					mListener.get().onSelectionClicked(this, mSelectedCoverView.getNumber());
-					
+					mListener.get().onSelectionClicked(this,
+							mSelectedCoverView.getNumber());
+
 			}
 			// Smooth scroll to the center of the cover
 			mScrollView.smoothScrollTo(mSelectedCoverView.getNumber()
-					* mConfig.COVER_SPACING, mScrollView
-					.getScrollY());
+					* mConfig.COVER_SPACING, mScrollView.getScrollY());
 
 			if (mBeginningCover != mSelectedCoverView.getNumber()) {
 				// Notify listener
@@ -410,8 +407,6 @@ public class CoverFlowView extends LinearLayout {
 
 		return true;
 	}
-	
-	
 
 	@Override
 	public boolean onTrackballEvent(MotionEvent event) {
@@ -422,13 +417,12 @@ public class CoverFlowView extends LinearLayout {
 				newCover = mSelectedCoverView.getNumber() + 1;
 			else if (event.getX(0) < 0)
 				newCover = mSelectedCoverView.getNumber() - 1;
-			
-			
-			if (0 <= newCover 
-					&& mNumberOfImages > newCover
+
+			if (0 <= newCover && mNumberOfImages > newCover
 					&& mSelectedCoverView.getNumber() != newCover) {
 				setSelectedCover(newCover);
-				mScrollView.smoothScrollTo(newCover * mConfig.COVER_SPACING, mScrollView.getScrollY());
+				mScrollView.smoothScrollTo(newCover * mConfig.COVER_SPACING,
+						mScrollView.getScrollY());
 				// Notify listener
 				if (null != mListener && null != mListener.get())
 					mListener.get().onSelectionChanged(this,
@@ -499,8 +493,8 @@ public class CoverFlowView extends LinearLayout {
 			return;
 
 		CoverFlowItem cover;
-		int newLowerBound = Math.max(0, newSelectedCover
-				- mConfig.COVER_BUFFER);
+		int newLowerBound = Math
+				.max(0, newSelectedCover - mConfig.COVER_BUFFER);
 		int newUpperBound = Math.min(mNumberOfImages - 1, newSelectedCover
 				+ mConfig.COVER_BUFFER);
 		if (null == mSelectedCoverView) {
@@ -675,7 +669,9 @@ public class CoverFlowView extends LinearLayout {
 
 	public interface Listener {
 		public void onSelectionChanging(CoverFlowView coverFlow, int index);
+
 		public void onSelectionChanged(CoverFlowView coverFlow, int index);
+
 		public void onSelectionClicked(CoverFlowView coverFlow, int index);
 	}
 
