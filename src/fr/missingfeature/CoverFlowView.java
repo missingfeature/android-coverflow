@@ -61,7 +61,6 @@ public class CoverFlowView extends LinearLayout {
 	int mNumberOfImages;
 	int mBeginningCover;
 	CoverFlowItem mSelectedCoverView = null;
-	Animation mLeftTransform, mRightTransform, mLeftAnimation, mRightAnimation;
 
 	int mHalfScreenHeight;
 	int mHalfScreenWidth;
@@ -438,6 +437,26 @@ public class CoverFlowView extends LinearLayout {
 		mTouchedCovers.add(cover.getNumber());
 	}
 
+	public void clear() {
+		mNumberOfImages = 0;
+		mSelectedCoverView = null;
+		mOffscreenCovers.clear();
+		mOnscreenCovers.clear();
+		mCoverImages.clear();
+		mCoverImageHeights.clear();
+		mDefaultBitmap = null;
+		mLowerVisibleCover = -1;
+		mUpperVisibleCover = -1;
+		
+		// Recreate the item container to force free memory
+		LinearLayout parent = (LinearLayout)mItemContainer.getParent();
+		parent.removeView(mItemContainer);
+		mItemContainer = new FrameLayout(getContext());
+		parent.addView(mItemContainer);
+
+
+	}
+
 	public void setNumberOfImages(int numberOfImages) {
 		mNumberOfImages = numberOfImages;
 
@@ -472,6 +491,9 @@ public class CoverFlowView extends LinearLayout {
 	}
 
 	public void centerOnSelectedCover(final boolean animated) {
+		if (null == mSelectedCoverView)
+			return;
+		
 		final int offset = mConfig.COVER_SPACING
 				* mSelectedCoverView.getNumber();
 		mScrollView.post(new Runnable() {
