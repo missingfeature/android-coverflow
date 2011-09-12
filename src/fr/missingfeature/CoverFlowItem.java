@@ -146,6 +146,10 @@ public class CoverFlowItem extends ImageView {
 		// draw the reflection
 		canvas.drawBitmap(reflection, padding, padding + b.getHeight(), null);
 
+		// recycle reflection
+		reflection.recycle();
+		reflection = null;
+
 		// draw the gradient
 		LinearGradient shader = new LinearGradient(0, b.getHeight(), 0, result
 				.getHeight(), 0x40000000, 0xff000000, TileMode.CLAMP);
