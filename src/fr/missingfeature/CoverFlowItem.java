@@ -7,6 +7,7 @@ import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
@@ -39,11 +40,11 @@ public class CoverFlowItem extends ImageView {
 	public int getBitmapWidth() {
 		return mBitmapWidth;
 	}
-	
+
 	public int getBitmapHeight() {
 		return mBitmapHeight;
 	}
-	
+
 	public int getNumber() {
 		return mNumber;
 	}
@@ -51,7 +52,7 @@ public class CoverFlowItem extends ImageView {
 	public int getOriginalImageHeight() {
 		return mOriginalImageHeight;
 	}
-	
+
 	public void setImageBitmap(Bitmap bitmap, int originalImageHeight,
 			float reflectionFraction) {
 		mOriginalImageHeight = originalImageHeight;
@@ -114,16 +115,8 @@ public class CoverFlowItem extends ImageView {
 		if (0 == reflectionFraction && 0 == dropShadowRadius)
 			return b;
 		
-		Bitmap reflection;
 		Bitmap result;
-		Matrix matrix = new Matrix();
-		matrix.preScale(1, -1);
-
 		int padding = dropShadowRadius;
-
-		// Create the reflection
-		reflection = Bitmap.createBitmap(b, 0, (int)(b.getHeight() * (1 - reflectionFraction)), b
-				.getWidth(), (int)(b.getHeight() * reflectionFraction), matrix, false);
 
 		// Create the result bitmap, in which we'll print the
 		// original bitmap and its reflection
@@ -144,11 +137,13 @@ public class CoverFlowItem extends ImageView {
 		canvas.drawBitmap(b, padding, padding, null);
 
 		// draw the reflection
-		canvas.drawBitmap(reflection, padding, padding + b.getHeight(), null);
-
-		// recycle reflection
-		reflection.recycle();
-		reflection = null;
+		Matrix matrix = new Matrix();
+		matrix.preScale(1, -1);
+		canvas.setMatrix(matrix);
+		int reflectionHeight = Math.round(reflectionFraction*b.getHeight());
+		canvas.drawBitmap(b, new Rect(0, b.getHeight() - reflectionHeight, b.getWidth(), b.getHeight()),
+				new Rect(padding, -reflectionHeight - padding - b.getHeight(), padding + b.getWidth(), -padding - b.getHeight()), null);
+		canvas.setMatrix(new Matrix());
 
 		// draw the gradient
 		LinearGradient shader = new LinearGradient(0, b.getHeight(), 0, result
