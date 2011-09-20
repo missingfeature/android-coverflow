@@ -288,7 +288,6 @@ public class CoverFlowView extends LinearLayout {
 	
 	public void setReflectedBitmapForIndex(Bitmap bitmapWithReflection, int index) {
 		mCoverImages.put(index, bitmapWithReflection);
-		mCoverImages.put(index, bitmapWithReflection);
 		int originalHeight = (int)((int)(bitmapWithReflection.getHeight() - 2 * mConfig.DROP_SHADOW_RADIUS) / (1 + mConfig.REFLECTION_FRACTION));
 		mCoverImageHeights.put(index, originalHeight);
 

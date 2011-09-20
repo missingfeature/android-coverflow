@@ -111,17 +111,19 @@ public class CoverFlowItem extends ImageView {
 		}
 	}
 
-	static Bitmap createReflectedBitmap(Bitmap b, float reflectionFraction, int dropShadowRadius) {
+	static Bitmap createReflectedBitmap(Bitmap b, float reflectionFraction,
+			int dropShadowRadius) {
 		if (0 == reflectionFraction && 0 == dropShadowRadius)
 			return b;
-		
+
 		Bitmap result;
 		int padding = dropShadowRadius;
 
 		// Create the result bitmap, in which we'll print the
 		// original bitmap and its reflection
 		result = Bitmap.createBitmap(b.getWidth() + padding * 2, 2 * padding
-				+ (int)(b.getHeight() * (1 + reflectionFraction)), Config.ARGB_8888);
+				+ (int) (b.getHeight() * (1 + reflectionFraction)),
+				Config.ARGB_8888);
 
 		// We'll work in a canvas
 		Canvas canvas = new Canvas(result);
@@ -140,9 +142,11 @@ public class CoverFlowItem extends ImageView {
 		Matrix matrix = new Matrix();
 		matrix.preScale(1, -1);
 		canvas.setMatrix(matrix);
-		int reflectionHeight = Math.round(reflectionFraction*b.getHeight());
-		canvas.drawBitmap(b, new Rect(0, b.getHeight() - reflectionHeight, b.getWidth(), b.getHeight()),
-				new Rect(padding, -reflectionHeight - padding - b.getHeight(), padding + b.getWidth(), -padding - b.getHeight()), null);
+		int reflectionHeight = Math.round(reflectionFraction * b.getHeight());
+		canvas.drawBitmap(b, new Rect(0, b.getHeight() - reflectionHeight, b
+				.getWidth(), b.getHeight()), new Rect(padding,
+				-reflectionHeight - padding - b.getHeight(), padding
+						+ b.getWidth(), -padding - b.getHeight()), null);
 		canvas.setMatrix(new Matrix());
 
 		// draw the gradient
@@ -152,7 +156,8 @@ public class CoverFlowItem extends ImageView {
 		paint.setShader(shader);
 		paint.setXfermode(new PorterDuffXfermode(Mode.DARKEN));
 		canvas.drawRect(padding, padding + b.getHeight(), padding
-				+ b.getWidth(), padding + b.getHeight() * (1 + reflectionFraction), paint);
+				+ b.getWidth(), padding + b.getHeight()
+				* (1 + reflectionFraction), paint);
 		return result;
 	}
 }
