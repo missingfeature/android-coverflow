@@ -21,6 +21,7 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ImageView.ScaleType;
 
@@ -38,9 +39,8 @@ public class CoverFlowView extends LinearLayout {
 		public int DROP_SHADOW_RADIUS = 15;
 		public boolean HORIZONTAL_SCROLLBAR_ENABLED = false;
 		public boolean FADING_EDGES_ENABLED = true;
-		public ViewGroup.LayoutParams IMAGE_VIEW_LAYOUT_PARAMS = new ViewGroup.LayoutParams(
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		public ScaleType IMAGE_VIEW_SCALE_TYPE = ScaleType.FIT_CENTER;
+		public float IMAGE_SCALE_X = 1;
+		public float IMAGE_SCALE_Y = 1;
 	}
 
 	Config mConfig = new Config();
@@ -130,8 +130,9 @@ public class CoverFlowView extends LinearLayout {
 		CoverFlowItem coverItem = dequeueReusableCover();
 		if (null == coverItem) {
 			coverItem = new CoverFlowItem(getContext());
-			coverItem.setLayoutParams(mConfig.IMAGE_VIEW_LAYOUT_PARAMS);
-			coverItem.setScaleType(mConfig.IMAGE_VIEW_SCALE_TYPE);
+			coverItem.setScaleType(ImageView.ScaleType.FIT_XY);
+			coverItem.setScaleX(mConfig.IMAGE_SCALE_X);
+			coverItem.setScaleY(mConfig.IMAGE_SCALE_Y);
 			coverItem.setOnTouchListener(new OnTouchListener() {
 				public boolean onTouch(View v, MotionEvent event) {
 					onTouchItem((CoverFlowItem) v, event);
@@ -164,8 +165,8 @@ public class CoverFlowView extends LinearLayout {
 
 		int coverNumber = cover.getNumber();
 		int newX = mHalfScreenWidth + cover.getNumber() * mConfig.COVER_SPACING
-				- (int) (cover.getBitmapWidth() / 2.0f);
-		int newY = mHalfScreenHeight - cover.getBitmapHeight() / 2;
+				- (int) (cover.getCoverWidth() / 2.0f);
+		int newY = mHalfScreenHeight - cover.getCoverHeight() / 2;
 
 		ItemAnimation oldAnimation = (ItemAnimation) cover.getAnimation();
 		float oldAngle = oldAnimation != null ? oldAnimation
@@ -183,8 +184,8 @@ public class CoverFlowView extends LinearLayout {
 					|| oldZOffset != mConfig.SIDE_COVER_ZPOSITION) {
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, mConfig.SIDE_COVER_ANGLE);
-				anim.setViewDimensions(cover.getBitmapWidth(), cover
-						.getOriginalImageHeight());
+				anim.setViewDimensions(cover.getCoverWidth(), cover
+						.getOriginalCoverHeight());
 				anim.setXTranslation(oldXOffset, -mConfig.CENTER_COVER_OFFSET);
 				anim.setZTranslation(oldZOffset, mConfig.SIDE_COVER_ZPOSITION);
 				if (animated)
@@ -198,8 +199,8 @@ public class CoverFlowView extends LinearLayout {
 					|| oldZOffset != mConfig.SIDE_COVER_ZPOSITION) {
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, -mConfig.SIDE_COVER_ANGLE);
-				anim.setViewDimensions(cover.getBitmapWidth(), cover
-						.getOriginalImageHeight());
+				anim.setViewDimensions(cover.getCoverWidth(), cover
+						.getOriginalCoverHeight());
 				anim.setXTranslation(oldXOffset, mConfig.CENTER_COVER_OFFSET);
 				anim.setZTranslation(oldZOffset, mConfig.SIDE_COVER_ZPOSITION);
 				if (animated)
@@ -212,8 +213,8 @@ public class CoverFlowView extends LinearLayout {
 			if (oldAngle != 0 || oldXOffset != 0 || oldZOffset != 0) {
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, 0);
-				anim.setViewDimensions(cover.getBitmapWidth(), cover
-						.getOriginalImageHeight());
+				anim.setViewDimensions(cover.getCoverWidth(), cover
+						.getOriginalCoverHeight());
 				anim.setXTranslation(oldXOffset, 0);
 				anim.setZTranslation(oldZOffset, 0);
 				if (animated)

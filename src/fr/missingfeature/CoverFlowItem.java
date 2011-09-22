@@ -12,6 +12,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 public class CoverFlowItem extends ImageView {
@@ -20,6 +21,8 @@ public class CoverFlowItem extends ImageView {
 	int mOriginalImageHeight;
 	int mBitmapWidth = 0;
 	int mBitmapHeight = 0;
+	float mScaleX = 1;
+	float mScaleY = 1;
 
 	public CoverFlowItem(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -33,24 +36,31 @@ public class CoverFlowItem extends ImageView {
 		super(context);
 	}
 
+	public void setScaleX(float x) {
+		mScaleX = x;
+	}
+	
+	public void setScaleY(float y) {
+		mScaleY = y;
+	}
 	public void setNumber(int n) {
 		mNumber = n;
 	}
 
-	public int getBitmapWidth() {
-		return mBitmapWidth;
+	public int getCoverWidth() {
+		return (int)(mBitmapWidth * mScaleX);
 	}
 
-	public int getBitmapHeight() {
-		return mBitmapHeight;
+	public int getCoverHeight() {
+		return (int)(mBitmapHeight * mScaleY);
 	}
 
 	public int getNumber() {
 		return mNumber;
 	}
 
-	public int getOriginalImageHeight() {
-		return mOriginalImageHeight;
+	public int getOriginalCoverHeight() {
+		return (int)(mOriginalImageHeight * mScaleY);
 	}
 
 	public void setImageBitmap(Bitmap bitmap, int originalImageHeight,
@@ -58,57 +68,8 @@ public class CoverFlowItem extends ImageView {
 		mOriginalImageHeight = originalImageHeight;
 		mBitmapWidth = bitmap.getWidth();
 		mBitmapHeight = bitmap.getHeight();
+		setLayoutParams(new ViewGroup.LayoutParams((int)(mBitmapWidth * mScaleX), (int)(mBitmapHeight * mScaleY)));
 		setImageBitmap(bitmap);
-	}
-
-	public Size calculateNewSize(Size originalImageSize, Size boundingBox) {
-		float boundingRatio = (float) boundingBox.getWidth()
-				/ boundingBox.getHeight();
-		float originalImageRatio = (float) originalImageSize.getWidth()
-				/ originalImageSize.getHeight();
-
-		int newWidth, newHeight;
-
-		if (originalImageRatio > boundingRatio) {
-			newWidth = boundingBox.getWidth();
-			newHeight = (int) ((float) boundingBox.getWidth()
-					* originalImageSize.getHeight() / originalImageSize
-					.getWidth());
-		} else {
-			newHeight = boundingBox.getHeight();
-			newWidth = (int) ((float) boundingBox.getHeight()
-					* originalImageSize.getWidth() / originalImageSize
-					.getHeight());
-		}
-		return new Size(newWidth, newHeight);
-	}
-
-	public static class Size {
-		int mWidth, mHeight;
-
-		public Size() {
-		}
-
-		public Size(int w, int h) {
-			mWidth = w;
-			mHeight = h;
-		}
-
-		public void setWidth(int w) {
-			mWidth = w;
-		}
-
-		public void setHeight(int h) {
-			mHeight = h;
-		}
-
-		public int getWidth() {
-			return mWidth;
-		}
-
-		public int getHeight() {
-			return mHeight;
-		}
 	}
 
 	static Bitmap createReflectedBitmap(Bitmap b, float reflectionFraction,
