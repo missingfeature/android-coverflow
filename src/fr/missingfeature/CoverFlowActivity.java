@@ -107,4 +107,8 @@ public class CoverFlowActivity extends Activity implements
 	public void onSelectionClicked(CoverFlowView coverFlow, int index) {
 		Log.d(TAG, String.format("Selection clicked: %d", index));
 	}
+
+	public void onSelectionLongClicked(CoverFlowView coverFlow, int index) {
+		Log.d(TAG, String.format("Selection long clicked: %d", index));
+	}
 }

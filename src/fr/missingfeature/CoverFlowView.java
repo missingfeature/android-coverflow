@@ -23,7 +23,6 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ImageView.ScaleType;
 
 public class CoverFlowView extends LinearLayout {
 
@@ -41,6 +40,7 @@ public class CoverFlowView extends LinearLayout {
 		public boolean FADING_EDGES_ENABLED = true;
 		public float IMAGE_SCALE_X = 1;
 		public float IMAGE_SCALE_Y = 1;
+		public long LONG_CLICK_DURATION = 2000;
 	}
 
 	Config mConfig = new Config();
@@ -55,7 +55,9 @@ public class CoverFlowView extends LinearLayout {
 	float mDefaultImageHeight;
 	ScrollView mScrollView;
 	ViewGroup mItemContainer;
-
+	Thread mLongClickThread;
+	boolean mCancelNextClick;
+	
 	int mLowerVisibleCover = -1;
 	int mUpperVisibleCover = -1;
 	int mNumberOfImages;
@@ -184,8 +186,8 @@ public class CoverFlowView extends LinearLayout {
 					|| oldZOffset != mConfig.SIDE_COVER_ZPOSITION) {
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, mConfig.SIDE_COVER_ANGLE);
-				anim.setViewDimensions(cover.getCoverWidth(), cover
-						.getOriginalCoverHeight());
+				anim.setViewDimensions(cover.getCoverWidth(),
+						cover.getOriginalCoverHeight());
 				anim.setXTranslation(oldXOffset, -mConfig.CENTER_COVER_OFFSET);
 				anim.setZTranslation(oldZOffset, mConfig.SIDE_COVER_ZPOSITION);
 				if (animated)
@@ -199,8 +201,8 @@ public class CoverFlowView extends LinearLayout {
 					|| oldZOffset != mConfig.SIDE_COVER_ZPOSITION) {
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, -mConfig.SIDE_COVER_ANGLE);
-				anim.setViewDimensions(cover.getCoverWidth(), cover
-						.getOriginalCoverHeight());
+				anim.setViewDimensions(cover.getCoverWidth(),
+						cover.getOriginalCoverHeight());
 				anim.setXTranslation(oldXOffset, mConfig.CENTER_COVER_OFFSET);
 				anim.setZTranslation(oldZOffset, mConfig.SIDE_COVER_ZPOSITION);
 				if (animated)
@@ -213,8 +215,8 @@ public class CoverFlowView extends LinearLayout {
 			if (oldAngle != 0 || oldXOffset != 0 || oldZOffset != 0) {
 				anim = new ItemAnimation();
 				anim.setRotation(oldAngle, 0);
-				anim.setViewDimensions(cover.getCoverWidth(), cover
-						.getOriginalCoverHeight());
+				anim.setViewDimensions(cover.getCoverWidth(),
+						cover.getOriginalCoverHeight());
 				anim.setXTranslation(oldXOffset, 0);
 				anim.setZTranslation(oldZOffset, 0);
 				if (animated)
@@ -237,8 +239,8 @@ public class CoverFlowView extends LinearLayout {
 			}
 		}
 
-		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(cover
-				.getLayoutParams());
+		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+				cover.getLayoutParams());
 		params.setMargins(newX, newY, 0, 0);
 		params.gravity = Gravity.LEFT | Gravity.TOP;
 		cover.setLayoutParams(params);
@@ -286,10 +288,11 @@ public class CoverFlowView extends LinearLayout {
 						mConfig.DROP_SHADOW_RADIUS);
 		setReflectedBitmapForIndex(bitmapWithReflection, index);
 	}
-	
-	public void setReflectedBitmapForIndex(Bitmap bitmapWithReflection, int index) {
+
+	public void setReflectedBitmapForIndex(Bitmap bitmapWithReflection,
+			int index) {
 		mCoverImages.put(index, bitmapWithReflection);
-		int originalHeight = (int)((int)(bitmapWithReflection.getHeight() - 2 * mConfig.DROP_SHADOW_RADIUS) / (1 + mConfig.REFLECTION_FRACTION));
+		int originalHeight = (int) ((int) (bitmapWithReflection.getHeight() - 2 * mConfig.DROP_SHADOW_RADIUS) / (1 + mConfig.REFLECTION_FRACTION));
 		mCoverImageHeights.put(index, originalHeight);
 
 		// If this cover is onscreen, set its image and call layoutCover.
@@ -300,7 +303,7 @@ public class CoverFlowView extends LinearLayout {
 			layoutCover(cover, mSelectedCoverView.getNumber(), false);
 		}
 	}
-	
+
 	public Bitmap[] getReflectedBitmaps() {
 		Bitmap[] result = new Bitmap[mCoverImages.size()];
 		for (int i = 0; i < result.length; i++)
@@ -332,14 +335,13 @@ public class CoverFlowView extends LinearLayout {
 
 		int lowerBound = Math.max(-1,
 				(mSelectedCoverView != null ? mSelectedCoverView.getNumber()
-						: 0)
-						- mConfig.COVER_BUFFER);
+						: 0) - mConfig.COVER_BUFFER);
 		int upperBound = Math.min(mNumberOfImages - 1,
 				(mSelectedCoverView != null ? mSelectedCoverView.getNumber()
-						: 0)
-						+ mConfig.COVER_BUFFER);
-		layoutCovers(mSelectedCoverView != null ? mSelectedCoverView
-				.getNumber() : 0, lowerBound, upperBound);
+						: 0) + mConfig.COVER_BUFFER);
+		layoutCovers(
+				mSelectedCoverView != null ? mSelectedCoverView.getNumber() : 0,
+				lowerBound, upperBound);
 
 		centerOnSelectedCover(false);
 	}
@@ -349,8 +351,41 @@ public class CoverFlowView extends LinearLayout {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			mIsSingleTap = event.getPointerCount() == 1;
-			if (mIsSingleTap)
+			final int index = mSelectedCoverView.getNumber();
+			if (mIsSingleTap) {
 				mStartX = event.getX(0);
+
+				int lowest = mTouchedCovers.first();
+				int highest = mTouchedCovers.last();
+
+				if (lowest <= mSelectedCoverView.getNumber()
+						&& highest >= mSelectedCoverView.getNumber()
+						&& null != mListener && null != mListener.get()
+						&& null == mLongClickThread) {
+					mLongClickThread = new Thread(new Runnable() {
+						public void run() {
+							try {
+								Thread.sleep(getConfig().LONG_CLICK_DURATION);
+								post(new Runnable() {
+
+									public void run() {
+										mListener.get().onSelectionLongClicked(
+												CoverFlowView.this, index);
+										mCancelNextClick = true;
+									}
+								});
+							} catch (InterruptedException e) {
+							}
+
+						}
+					});
+					mLongClickThread.start();
+					mCancelNextClick = false;
+					
+				}
+
+			}
+
 			mBeginningCover = mSelectedCoverView.getNumber();
 			mStartScrollX = event.getX(0) + mScrollView.getScrollX();
 			break;
@@ -362,6 +397,14 @@ public class CoverFlowView extends LinearLayout {
 			mIsSingleTap = mIsSingleTap && (xOffset < 20);
 
 			if (!mIsSingleTap) {
+				// Cancel long click
+				if (null != mLongClickThread
+						&& Thread.State.TERMINATED != mLongClickThread
+								.getState()) {
+					mLongClickThread.interrupt();
+					mLongClickThread = null;
+				}
+
 				// Update the scroll position
 				mScrollView.scrollTo(scrollOffset, mScrollView.getScrollY());
 
@@ -386,6 +429,14 @@ public class CoverFlowView extends LinearLayout {
 
 			break;
 		case MotionEvent.ACTION_UP:
+
+			// Cancel long click
+			if (null != mLongClickThread) {
+				if (Thread.State.TERMINATED != mLongClickThread.getState())
+					mLongClickThread.interrupt();
+				mLongClickThread = null;
+			}
+			
 			if (mIsSingleTap && 0 < mTouchedCovers.size()) {
 				int lowest = mTouchedCovers.first();
 				int highest = mTouchedCovers.last();
@@ -395,11 +446,18 @@ public class CoverFlowView extends LinearLayout {
 					setSelectedCover(highest);
 				else if (lowest <= mSelectedCoverView.getNumber()
 						&& highest >= mSelectedCoverView.getNumber()
-						&& null != mListener && null != mListener.get())
-					mListener.get().onSelectionClicked(this,
-							mSelectedCoverView.getNumber());
+						&& null != mListener && null != mListener.get()) {
+					if (!mCancelNextClick) {
+						mListener.get().onSelectionClicked(this,
+								mSelectedCoverView.getNumber());
+					}
+				}
+
 
 			}
+			
+			mCancelNextClick = false;
+			
 			// Smooth scroll to the center of the cover
 			mScrollView.smoothScrollTo(mSelectedCoverView.getNumber()
 					* mConfig.COVER_SPACING, mScrollView.getScrollY());
@@ -413,6 +471,7 @@ public class CoverFlowView extends LinearLayout {
 
 			// Clear touched covers
 			mTouchedCovers.clear();
+
 
 			break;
 		}
@@ -460,13 +519,12 @@ public class CoverFlowView extends LinearLayout {
 		mDefaultBitmap = null;
 		mLowerVisibleCover = -1;
 		mUpperVisibleCover = -1;
-		
+
 		// Recreate the item container to force free memory
-		LinearLayout parent = (LinearLayout)mItemContainer.getParent();
+		LinearLayout parent = (LinearLayout) mItemContainer.getParent();
 		parent.removeView(mItemContainer);
 		mItemContainer = new FrameLayout(getContext());
 		parent.addView(mItemContainer);
-
 
 	}
 
@@ -475,12 +533,10 @@ public class CoverFlowView extends LinearLayout {
 
 		int lowerBound = Math.max(-1,
 				(mSelectedCoverView != null ? mSelectedCoverView.getNumber()
-						: 0)
-						- mConfig.COVER_BUFFER);
+						: 0) - mConfig.COVER_BUFFER);
 		int upperBound = Math.min(mNumberOfImages - 1,
 				(mSelectedCoverView != null ? mSelectedCoverView.getNumber()
-						: 0)
-						+ mConfig.COVER_BUFFER);
+						: 0) + mConfig.COVER_BUFFER);
 		if (null != mSelectedCoverView)
 			layoutCovers(mSelectedCoverView.getNumber(), lowerBound, upperBound);
 		else
@@ -506,7 +562,7 @@ public class CoverFlowView extends LinearLayout {
 	public void centerOnSelectedCover(final boolean animated) {
 		if (null == mSelectedCoverView)
 			return;
-		
+
 		final int offset = mConfig.COVER_SPACING
 				* mSelectedCoverView.getNumber();
 		mScrollView.post(new Runnable() {
@@ -669,8 +725,8 @@ public class CoverFlowView extends LinearLayout {
 		}
 
 		if (mSelectedCoverView.getNumber() > newSelectedCover) {
-			layoutCovers(newSelectedCover, newSelectedCover, mSelectedCoverView
-					.getNumber());
+			layoutCovers(newSelectedCover, newSelectedCover,
+					mSelectedCoverView.getNumber());
 		} else if (newSelectedCover > mSelectedCoverView.getNumber()) {
 			layoutCovers(newSelectedCover, mSelectedCoverView.getNumber(),
 					newSelectedCover);
@@ -708,6 +764,8 @@ public class CoverFlowView extends LinearLayout {
 		public void onSelectionChanged(CoverFlowView coverFlow, int index);
 
 		public void onSelectionClicked(CoverFlowView coverFlow, int index);
+
+		public void onSelectionLongClicked(CoverFlowView coverFlow, int index);
 	}
 
 	public static class ItemAnimation extends Animation {
